@@ -1,0 +1,12 @@
+aws_region  = "us-east-1"
+app_name    = "chat-app"
+environment = "prod"
+
+# Sensitive values - DO NOT commit actual values
+db_password        = "CHANGE_ME_STRONG_PASSWORD"
+jwt_secret         = "CHANGE_ME_64_CHAR_SECRET"
+stream_api_key     = "CHANGE_ME_STREAM_KEY"
+stream_api_secret  = "CHANGE_ME_STREAM_SECRET"
+docker_image       = "869935099753.dkr.ecr.us-east-1.amazonaws.com/chat-app-backend"
+
+

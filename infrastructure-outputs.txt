@@ -1,0 +1,4 @@
+alb_dns_name = "chat-app-alb-1710361472.us-east-1.elb.amazonaws.com"
+db_endpoint = "chat-app-db.cuhmugm8ox29.us-east-1.rds.amazonaws.com:5432"
+ecr_repository_url = "869935099753.dkr.ecr.us-east-1.amazonaws.com/chat-app-backend"
+ecs_cluster_name = "chat-app-cluster"
