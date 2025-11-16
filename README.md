@@ -1,48 +1,178 @@
-# Chat Application API
+# Multi-Tenant Chat Application
 
-A multi-tenant real-time chat application built with Go, featuring role-based access control (RBAC), JWT authentication, and Stream Chat integration for scalable messaging.
+A production-ready, scalable multi-tenant chat application built with Go, PostgreSQL, and Stream Chat API. Features role-based access control (RBAC), JWT authentication, and automated AWS Fargate deployment.
 
-## 🚀 Features
-
-- **Multi-Tenant Architecture** - Isolated organizations with tenant-based data segregation
-- **Role-Based Access Control (RBAC)** - Four user roles: Admin, Moderator, Member, and Guest
-- **JWT Authentication** - Secure token-based authentication
-- **Real-Time Messaging** - Powered by Stream Chat API
-- **RESTful API** - Clean and intuitive endpoints
-- **PostgreSQL Database** - Reliable data persistence with GORM
-- **Swagger Documentation** - Interactive API documentation
-- **CORS Support** - Cross-origin resource sharing enabled
+[![Go Version](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![AWS](https://img.shields.io/badge/AWS-Fargate-orange.svg)](https://aws.amazon.com/fargate/)
 
 ## 📋 Table of Contents
 
-- [Technology Stack](#technology-stack)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
 - [API Documentation](#api-documentation)
-- [User Roles & Permissions](#user-roles--permissions)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Monitoring](#monitoring)
+- [Contributing](#contributing)
 
-## 🛠 Technology Stack
+## ✨ Features
 
+### Core Functionality
+- **Multi-Tenancy**: Isolated data per organization with tenant-based access control
+- **Real-time Messaging**: Powered by Stream Chat API for instant communication
+- **Role-Based Access Control (RBAC)**: Four roles - Admin, Moderator, Member, Guest
+- **JWT Authentication**: Secure token-based authentication
+- **Channel Management**: Create, join, and manage chat channels
+- **User Management**: Full CRUD operations with role-based permissions
+
+### Technical Features
+- **RESTful API**: Clean, well-documented API endpoints
+- **Database Mocking**: Comprehensive test suite with sqlmock
+- **Infrastructure as Code**: Terraform modules for AWS deployment
+- **CI/CD Pipeline**: Automated testing and deployment via GitHub Actions
+- **Health Checks**: Built-in health monitoring endpoints
+- **CORS Support**: Configured for frontend integration
+- **Swagger Documentation**: Interactive API documentation
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Internet                             │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  Application Load    │
+              │     Balancer (ALB)   │
+              └──────────┬───────────┘
+                         │
+         ┌───────────────┴───────────────┐
+         │                               │
+         ▼                               ▼
+┌─────────────────┐           ┌─────────────────┐
+│  ECS Fargate    │           │  ECS Fargate    │
+│   Task (AZ-1)   │           │   Task (AZ-2)   │
+│   Go Backend    │           │   Go Backend    │
+└────────┬────────┘           └────────┬────────┘
+         │                               │
+         └───────────────┬───────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │   RDS PostgreSQL     │
+              │   (Multi-AZ Ready)   │
+              └──────────────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │   Stream Chat API    │
+              │   (External SaaS)    │
+              └──────────────────────┘
+```
+
+### Key Components
+
+- **Backend**: Go 1.24 with Gin framework
+- **Database**: PostgreSQL 15.7 (AWS RDS)
+- **Real-time**: Stream Chat API
+- **Container Orchestration**: AWS ECS Fargate
+- **Load Balancing**: Application Load Balancer
+- **Secrets Management**: AWS Secrets Manager
+- **Monitoring**: CloudWatch Logs & Metrics
+
+## 🛠️ Tech Stack
+
+### Backend
 - **Language**: Go 1.24
-- **Web Framework**: Gin
-- **Database**: PostgreSQL
+- **Framework**: Gin (HTTP web framework)
 - **ORM**: GORM
 - **Authentication**: JWT (golang-jwt/jwt)
-- **Real-Time Chat**: Stream Chat Go SDK
 - **Password Hashing**: bcrypt
-- **API Documentation**: Swagger (gin-swagger)
-- **Environment Management**: godotenv
+- **Real-time**: Stream Chat Go SDK
 
-## 📦 Prerequisites
+### Database
+- **Primary**: PostgreSQL 15.7
+- **Driver**: pgx/v5
 
-- Go 1.24 or higher
-- Docker & Docker Compose (recommended) OR PostgreSQL 12+
-- Stream Chat account ([Get API credentials](https://getstream.io/chat/))
+### Infrastructure
+- **Cloud Provider**: AWS
+- **Compute**: ECS Fargate (serverless containers)
+- **Database**: RDS PostgreSQL
+- **Load Balancer**: Application Load Balancer
+- **Container Registry**: ECR
+- **IaC**: Terraform
+- **CI/CD**: GitHub Actions
 
-## 🔧 Installation
+### Testing
+- **Framework**: testify
+- **Mocking**: sqlmock (database mocking)
+
+## 📁 Project Structure
+
+```
+chat-app/
+├── cmd/
+│   └── main.go                 # Application entry point
+├── db/
+│   ├── db.go                   # Database connection
+│   └── mock.go                 # Database mocking utilities
+├── handlers/
+│   ├── auth.go                 # Authentication handlers
+│   ├── channel.go              # Channel management
+│   ├── channel_test.go         # Channel tests
+│   ├── stream.go               # Stream Chat integration
+│   └── tenant_user.go          # Tenant & user management
+├── middleware/
+│   ├── auth.go                 # Authentication middleware
+│   ├── jwt.go                  # JWT utilities
+│   └── rbac.go                 # Role-based access control
+├── models/
+│   └── models.go               # Data models
+├── services/
+│   ├── bcrypt.go               # Password hashing
+│   ├── channel.go              # Channel business logic
+│   └── stream.go               # Stream Chat service
+├── utils/
+│   └── jwt.go                  # JWT helper functions
+├── testutil/
+│   └── helpers.go              # Test utilities
+├── terraform/
+│   ├── main.tf                 # Root Terraform config
+│   ├── variables.tf            # Input variables
+│   ├── outputs.tf              # Output values
+│   └── modules/
+│       ├── vpc/                # Network infrastructure
+│       ├── rds/                # Database module
+│       ├── ecs/                # Container orchestration
+│       ├── alb/                # Load balancer
+│       └── secrets/            # Secrets management
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # CI/CD pipeline
+├── Dockerfile                  # Container image definition
+├── docker-compose.yml          # Local development setup
+├── setup-infrastructure.sh     # Infrastructure setup script
+├── .env.example                # Environment variables template
+└── README.md                   # This file
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Go 1.24+
+- Docker & Docker Compose
+- PostgreSQL 15+ (or use Docker Compose)
+- Stream Chat account ([getstream.io](https://getstream.io))
+- AWS CLI (for deployment)
+- Terraform 1.0+ (for deployment)
+
+### Local Development Setup
 
 1. **Clone the repository**
 ```bash
@@ -50,409 +180,433 @@ git clone https://github.com/Nyagar-Abraham/chat-app.git
 cd chat-app
 ```
 
-2. **Install dependencies**
-```bash
-go mod download
-```
-
-3. **Set up PostgreSQL database**
-
-**Option A: Using Docker Compose (Recommended)**
-```bash
-docker-compose up -d
-```
-
-**Option B: Local PostgreSQL**
-```bash
-createdb chat_db
-```
-
-## ⚙️ Configuration
-
-1. **Copy the example environment file**
+2. **Set up environment variables**
 ```bash
 cp .env.example .env
 ```
 
-2. **Configure environment variables in `.env`**
+Edit `.env` with your configuration:
 ```env
-DATABASE_URL=postgresql://chatuser:chatpassword@localhost:5432/chat_db?sslmode=disable
-STREAM_API_KEY=<your_stream_api_key>
-STREAM_API_SECRET=<your_stream_api_secret>
-JWT_SECRET=<your_jwt_secret>
+DATABASE_URL=postgresql://chatuser:chatpassword@localhost:5434/chat_db?sslmode=disable
+STREAM_API_KEY=your_stream_api_key
+STREAM_API_SECRET=your_stream_api_secret
+JWT_SECRET=your_64_character_secret
 MIGRATE_DB=true
 PORT=8085
 ```
 
-**Environment Variables:**
-- `DATABASE_URL` - PostgreSQL connection string
-- `STREAM_API_KEY` - Stream Chat API key
-- `STREAM_API_SECRET` - Stream Chat API secret
-- `JWT_SECRET` - Secret key for JWT token generation
-- `MIGRATE_DB` - Set to `true` to auto-migrate database schema (development only)
-- `PORT` - Server port (default: 8085)
+3. **Start PostgreSQL with Docker Compose**
+```bash
+docker-compose up -d
+```
 
-## 🚀 Running the Application
+4. **Install dependencies**
+```bash
+go mod download
+```
 
-**Start the server**
+5. **Run database migrations**
+```bash
+# Migrations run automatically when MIGRATE_DB=true
+go run cmd/main.go
+```
+
+6. **Start the server**
 ```bash
 go run cmd/main.go
 ```
 
-The server will start on `http://localhost:8085`
+The API will be available at `http://localhost:8085`
 
-**Access Swagger Documentation**
-```
-http://localhost:8085/swagger/index.html
-```
+### Generate JWT Secret
 
-## 📁 Project Structure
-
-```
-chat-app/
-├── cmd/
-│   └── main.go              # Application entry point
-├── db/
-│   └── db.go                # Database connection and migration
-├── handlers/
-│   ├── auth.go              # Authentication handlers (login, register)
-│   ├── channel.go           # Channel management handlers
-│   ├── stream.go            # Stream Chat messaging handlers
-│   └── tenant_user.go       # Tenant and user management handlers
-├── middleware/
-│   ├── auth.go              # Authentication middleware
-│   ├── jwt.go               # JWT middleware
-│   └── rbac.go              # Role-based access control middleware
-├── models/
-│   └── models.go            # Data models (User, Tenant, Channel)
-├── services/
-│   ├── bcrypt.go            # Password hashing service
-│   ├── channel.go           # Channel service logic
-│   └── stream.go            # Stream Chat integration
-├── utils/
-│   └── jwt.go               # JWT token utilities
-├── .env.example             # Example environment configuration
-├── go.mod                   # Go module dependencies
-└── go.sum                   # Dependency checksums
+```bash
+openssl rand -hex 32
 ```
 
 ## 📚 API Documentation
 
-### Authentication Endpoints
+### Interactive Documentation
 
-#### Register User
+Access Swagger UI at: `http://localhost:8085/swagger/index.html`
+
+### Authentication
+
+All authenticated endpoints require a JWT token in the Authorization header:
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+### Core Endpoints
+
+#### Authentication
 ```http
-POST /auth/register
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "securepassword",
-  "role": "MEMBER",
-  "org_name": "Acme Corp"
-}
+POST   /auth/register          # Register new user
+POST   /auth/login             # Login user
+GET    /me                     # Get current user
 ```
 
-**Response:**
-```json
-{
-  "id": "uuid",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "role": "MEMBER",
-  "token": "jwt_token",
-  "tenant_id": "tenant_uuid"
-}
-```
-
-#### Login
+#### Tenants
 ```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "securepassword"
-}
+POST   /tenants                # Create tenant (Admin only)
+GET    /tenants                # List all tenants
+GET    /tenants/:id            # Get tenant by ID
 ```
 
-**Response:**
-```json
-{
-  "token": "jwt_token",
-  "message": "John Doe"
-}
-```
-
-#### Get Current User
+#### Users
 ```http
-GET /me
-Authorization: Bearer <token>
+POST   /users                  # Create user (Admin/Moderator)
+GET    /users                  # List users
+PUT    /users/:id              # Update user (Admin/Moderator)
+DELETE /users/:id              # Delete user (Admin only)
 ```
 
-### Tenant Endpoints
-
-#### Create Tenant (Admin Only)
+#### Channels
 ```http
-POST /tenants
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "New Organization"
-}
+POST   /channels               # Create channel (Admin/Moderator)
+GET    /channels               # List channels
+POST   /channels/:id/join      # Join channel
+POST   /channels/:id/leave     # Leave channel
+GET    /channels/:id/members   # Get channel members
+POST   /channels/:id/members   # Add user to channel (Admin/Moderator)
+DELETE /channels/:id/members/:user_id  # Remove user (Admin/Moderator)
 ```
 
-#### List All Tenants
+#### Messages
 ```http
-GET /tenants
+POST   /messages               # Send message
+GET    /messages/:stream_id    # Get messages
 ```
 
-#### Get Tenant by ID
+#### Stream Chat
 ```http
-GET /tenants/:id
+GET    /stream/token           # Get Stream Chat token
 ```
 
-### User Management Endpoints
-
-#### Create User (Admin/Moderator)
+#### Health Check
 ```http
-POST /users
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Jane Smith",
-  "email": "jane@example.com",
-  "password": "password123",
-  "role": "MEMBER",
-  "tenant_id": "tenant_uuid"
-}
+GET    /health                 # Health check endpoint
 ```
 
-#### List Users
-```http
-GET /users
-Authorization: Bearer <token>
-```
+### Example Requests
 
-#### Update User (Admin/Moderator)
-```http
-PUT /users/:id
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Jane Doe",
-  "role": "MODERATOR"
-}
-```
-
-#### Delete User (Admin Only)
-```http
-DELETE /users/:id
-Authorization: Bearer <token>
-```
-
-### Channel Endpoints
-
-#### Create Channel (Admin/Moderator)
-```http
-POST /channels
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "General",
-  "description": "General discussion channel"
-}
-```
-
-**Note**: The channel creator is automatically added as a member.
-
-#### List Channels
-```http
-GET /channels
-Authorization: Bearer <token>
-```
-
-#### Add User to Channel (Admin/Moderator)
-```http
-POST /channels/:id/members
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "user_id": "user_uuid"
-}
-```
-
-#### Remove User from Channel (Admin/Moderator)
-```http
-DELETE /channels/:id/members/:user_id
-Authorization: Bearer <token>
-```
-
-#### Join Channel
-```http
-POST /channels/:id/join
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "message": "Joined channel successfully"
-}
-```
-
-#### Leave Channel
-```http
-POST /channels/:id/leave
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "message": "Left channel successfully"
-}
-```
-
-#### List Channel Members
-```http
-GET /channels/:id/members
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-[
-  {
-    "id": "user_uuid",
+**Register User:**
+```bash
+curl -X POST http://localhost:8085/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
     "name": "John Doe",
     "email": "john@example.com",
+    "password": "securepassword",
     "role": "MEMBER",
-    "tenant_id": "tenant_uuid"
-  }
-]
+    "org_name": "Acme Corp"
+  }'
 ```
 
-### Messaging Endpoints
-
-#### Get Stream Token
-```http
-GET /stream/token
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "token": "stream_chat_token"
-}
-```
-
-#### Send Message
-```http
-POST /messages
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "stream_id": "channel_stream_id",
-  "text": "Hello, World!"
-}
-```
-
-**Note**: User must be a member of the channel to send messages. Returns 403 Forbidden if not a member.
-
-#### Get Messages
-```http
-GET /messages/:stream_id
-Authorization: Bearer <token>
-```
-
-**Note**: User must be a member of the channel to view messages. Returns 403 Forbidden if not a member.
-
-## 👥 User Roles & Permissions
-
-| Role | Permissions |
-|------|-------------|
-| **ADMIN** | Full access - manage tenants, users, channels, and messages |
-| **MODERATOR** | Create/update users, create channels, send messages |
-| **MEMBER** | Send messages, view channels |
-| **GUEST** | Limited read access |
-
-### Role-Based Endpoint Access
-
-- **Tenant Creation**: Admin only
-- **User Creation/Update**: Admin, Moderator
-- **User Deletion**: Admin only
-- **Channel Creation**: Admin, Moderator
-- **Add/Remove Channel Members**: Admin, Moderator
-- **Join/Leave Channels**: All authenticated users
-- **Messaging**: Channel members only (tenant-isolated)
-
-## 🔐 Authentication Flow
-
-1. **Register** - Create account with organization name (auto-creates or joins tenant)
-2. **Login** - Receive JWT token
-3. **Authenticate** - Include token in `Authorization: Bearer <token>` header
-4. **Access Resources** - Token contains user_id, tenant_id, and role claims
-
-## 🔒 Channel Membership & Security
-
-### Tenant Isolation
-All channels are isolated by tenant. Users can only:
-- View channels within their tenant
-- Join channels within their tenant
-- Send/receive messages in channels they are members of
-
-### Membership Flow
-1. **Admin/Moderator creates a channel** - Creator is automatically added as a member
-2. **Users join channels** - Use `/channels/:id/join` endpoint
-3. **Admin/Moderator adds users** - Use `/channels/:id/members` endpoint
-4. **Send messages** - Only channel members can send/view messages
-
-### Security Features
-- ✅ Tenant-scoped channel access
-- ✅ Membership validation for messaging
-- ✅ Role-based member management
-- ✅ Automatic Stream Chat synchronization
-
-## 🧪 Testing
-
-Use the Swagger UI at `/swagger/index.html` for interactive API testing, or use tools like:
-- **Postman** - Import endpoints and test
-- **cURL** - Command-line testing
-- **HTTPie** - User-friendly HTTP client
-
-**Example cURL request:**
+**Login:**
 ```bash
 curl -X POST http://localhost:8085/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password123"}'
+  -d '{
+    "email": "john@example.com",
+    "password": "securepassword"
+  }'
 ```
 
-## 📝 License
+**Create Channel:**
+```bash
+curl -X POST http://localhost:8085/channels \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "general",
+    "description": "General discussion"
+  }'
+```
 
-This project is available for use under standard software licensing terms.
+## 🧪 Testing
+
+### Run All Tests
+
+```bash
+go test ./...
+```
+
+### Run Tests with Coverage
+
+```bash
+go test -cover ./...
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+```
+
+### Run Specific Package Tests
+
+```bash
+go test ./handlers -v
+```
+
+### Testing Features
+
+- **Database Mocking**: All tests use sqlmock for isolated testing
+- **No Real Database Required**: Tests run without PostgreSQL
+- **Fast Execution**: No I/O overhead
+- **Comprehensive Coverage**: Handler, service, and middleware tests
+
+### Test Structure
+
+```go
+func TestExample(t *testing.T) {
+    mock := testutil.SetupMockDB(t)
+    
+    // Define expectations
+    mock.ExpectQuery("SELECT...").WillReturnRows(...)
+    
+    // Run test
+    // ...
+    
+    // Verify
+    assert.NoError(t, mock.ExpectationsWereMet())
+}
+```
+
+See [TESTING_GUIDE.md](TESTING_GUIDE.md) for detailed testing documentation.
+
+## 🚀 Deployment
+
+### Deployment Architecture
+
+The application uses a **two-phase deployment approach**:
+
+1. **Infrastructure Setup** (One-time) - Terraform creates AWS resources
+2. **Application Deployment** (Automated) - GitHub Actions deploys code
+
+### Phase 1: Infrastructure Setup
+
+#### Prerequisites
+
+- AWS account with appropriate permissions
+- AWS CLI configured
+- Terraform installed
+- Domain name (optional)
+
+#### Step 1: Configure Terraform Variables
+
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars`:
+```hcl
+aws_region  = "us-east-1"
+app_name    = "chat-app"
+environment = "prod"
+
+db_password        = "your_strong_password"
+jwt_secret         = "your_64_char_secret"
+stream_api_key     = "your_stream_key"
+stream_api_secret  = "your_stream_secret"
+```
+
+#### Step 2: Run Infrastructure Setup
+
+```bash
+./setup-infrastructure.sh
+```
+
+This creates:
+- VPC with public/private subnets (2 AZs)
+- RDS PostgreSQL database
+- ECS Fargate cluster
+- Application Load Balancer
+- ECR repository
+- Secrets Manager secrets
+- CloudWatch logs
+- IAM roles and policies
+
+#### Step 3: Update Database Secret
+
+```bash
+# Get database endpoint
+DB_ENDPOINT=$(cd terraform && terraform output -raw db_endpoint)
+
+# Update secret
+aws secretsmanager update-secret \
+  --secret-id chat-app/prod/database-url \
+  --secret-string "postgresql://chatadmin:YOUR_PASSWORD@${DB_ENDPOINT}/chat_db?sslmode=require"
+```
+
+### Phase 2: CI/CD Deployment
+
+#### Configure GitHub Secrets
+
+Add these secrets to your GitHub repository:
+
+```
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+```
+
+#### Automatic Deployment
+
+Push to `main` branch triggers automatic deployment:
+
+```bash
+git add .
+git commit -m "Deploy to production"
+git push origin main
+```
+
+#### Deployment Pipeline
+
+```
+Code Push → Tests → Build Docker → Push to ECR → Update ECS → Live
+```
+
+The GitHub Actions workflow:
+1. Runs all tests with mocked database
+2. Builds Docker image
+3. Pushes to Amazon ECR
+4. Updates ECS service
+5. Waits for deployment to stabilize
+
+### Infrastructure Details
+
+**AWS Resources Created:**
+- **VPC**: 10.0.0.0/16 with 2 AZs
+- **Subnets**: 2 public, 2 private
+- **NAT Gateways**: 2 (high availability)
+- **RDS**: PostgreSQL 15.7, db.t3.micro
+- **ECS**: Fargate cluster with 2 tasks
+- **ALB**: Application Load Balancer
+- **ECR**: Docker image registry
+
+**Monthly Cost Estimate:** ~$130
+- ECS Fargate: $15
+- RDS: $15
+- ALB: $20
+- NAT Gateways: $65
+- Other: $15
+
+### Deployment Documentation
+
+- [AWS_FARGATE_DEPLOYMENT.md](AWS_FARGATE_DEPLOYMENT.md) - Complete deployment guide
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Detailed architecture documentation
+- [SETUP_GUIDE.md](SETUP_GUIDE.md) - Infrastructure setup guide
+
+## 📊 Monitoring
+
+### CloudWatch Logs
+
+```bash
+# View logs
+aws logs tail /ecs/chat-app --follow
+
+# Filter errors
+aws logs filter-pattern /ecs/chat-app --filter-pattern "ERROR"
+```
+
+### Health Checks
+
+```bash
+# Check application health
+curl http://your-alb-dns/health
+
+# Check ECS service
+aws ecs describe-services --cluster chat-app-cluster --services chat-app-service
+```
+
+### Metrics
+
+- **Application**: Request count, error rate, response time
+- **Infrastructure**: CPU/Memory utilization, network traffic
+- **Database**: Connections, query performance
+
+### Scaling
+
+```bash
+# Scale ECS service
+aws ecs update-service \
+  --cluster chat-app-cluster \
+  --service chat-app-service \
+  --desired-count 4
+```
+
+## 🔒 Security
+
+### Best Practices Implemented
+
+- ✅ **Secrets Management**: AWS Secrets Manager for credentials
+- ✅ **Network Isolation**: Database in private subnets
+- ✅ **Encryption**: Data encrypted at rest and in transit
+- ✅ **JWT Authentication**: Secure token-based auth
+- ✅ **Password Hashing**: bcrypt with cost factor 12
+- ✅ **RBAC**: Role-based access control
+- ✅ **CORS**: Configured for frontend domains
+- ✅ **Security Groups**: Minimal port exposure
+- ✅ **IAM**: Least privilege access
+
+### Environment Variables
+
+Never commit sensitive data. Use:
+- `.env` for local development (gitignored)
+- AWS Secrets Manager for production
+- GitHub Secrets for CI/CD
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+### Development Workflow
+
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`go test ./...`)
+5. Commit changes (`git commit -m 'Add amazing feature'`)
+6. Push to branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-## 📧 Contact
+### Code Standards
 
-For questions or support, please contact the development team.
+- Follow Go best practices
+- Write tests for new features
+- Update documentation
+- Use meaningful commit messages
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- **Abraham Nyagar** - [GitHub](https://github.com/Nyagar-Abraham)
+
+## 🙏 Acknowledgments
+
+- [Gin Web Framework](https://gin-gonic.com/)
+- [GORM](https://gorm.io/)
+- [Stream Chat](https://getstream.io/)
+- [AWS](https://aws.amazon.com/)
+- [Terraform](https://www.terraform.io/)
+
+## 📞 Support
+
+For issues and questions:
+- Open an issue on GitHub
+- Check existing documentation
+- Review API documentation at `/swagger`
+
+## 🗺️ Roadmap
+
+- [ ] WebSocket support for real-time updates
+- [ ] Message reactions and threading
+- [ ] File upload and sharing
+- [ ] Push notifications
+- [ ] Advanced search functionality
+- [ ] Analytics dashboard
+- [ ] Rate limiting
+- [ ] API versioning
 
 ---
 
-**Built with ❤️ using Go and Stream Chat**
+**Built with ❤️ using Go and AWS**
