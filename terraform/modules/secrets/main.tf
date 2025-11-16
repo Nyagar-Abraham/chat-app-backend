@@ -5,7 +5,7 @@ resource "aws_secretsmanager_secret" "database_url" {
 
 resource "aws_secretsmanager_secret_version" "database_url" {
   secret_id     = aws_secretsmanager_secret.database_url.id
-  secret_string = "postgresql://chatadmin:${var.db_password}@PLACEHOLDER:5432/chat_db?sslmode=require"
+  secret_string = "postgresql://chatadmin:${var.db_password}@chat-app-db.cuhmugm8ox29.us-east-1.rds.amazonaws.com:5432/chat_db?sslmode=require"
 }
 
 resource "aws_secretsmanager_secret" "jwt_secret" {
