@@ -77,16 +77,16 @@ jobs:
       - name: Update ECS service
         run: |
           aws ecs update-service \
-            --cluster chat-app-ecs-cluster \
-            --service chatapp-task-service-osdrvfbs \
+            --cluster chat-app-cluster \
+            --service chat-app-service \
             --force-new-deployment \
             --region us-east-1
 
       - name: Wait for deployment
         run: |
           aws ecs wait services-stable \
-            --cluster chat-app-ecs-cluster  \
-            --services chatapp-task-service-osdrvfbs \
+            --cluster chat-app-cluster  \
+            --services chat-app-service \
             --region us-east-1
 
 #      - name: Notify deployment
