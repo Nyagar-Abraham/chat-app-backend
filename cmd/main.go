@@ -37,7 +37,7 @@ func main() {
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Welcome to the API!!",
+			"message": "Welcome to the chat API!!",
 		})
 	})
 
