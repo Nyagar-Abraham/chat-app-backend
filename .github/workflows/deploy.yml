@@ -50,7 +50,8 @@ jobs:
 
 
   QAWithSonarqube:
-    name: SonarQube
+    needs: test
+    name: QAWithSonarqube
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +72,7 @@ jobs:
 
 
   deploy-aws:
-    needs: test
+    needs: QAWithSonarqube
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
