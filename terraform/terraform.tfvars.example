@@ -1,12 +1,43 @@
+# Basic Configuration
 aws_region  = "us-east-1"
 app_name    = "chat-app"
 environment = "prod"
 
-# Sensitive values - DO NOT commit actual values
-db_password        = "CHANGE_ME_STRONG_PASSWORD"
-jwt_secret         = "CHANGE_ME_64_CHAR_SECRET"
-stream_api_key     = "CHANGE_ME_STREAM_KEY"
-stream_api_secret  = "CHANGE_ME_STREAM_SECRET"
-docker_image       = "869935099753.dkr.ecr.us-east-1.amazonaws.com/chat-app-backend"
+# Secrets (DO NOT commit actual values)
+db_password        = "your_strong_db_password_here"
+jwt_secret         = "your_64_character_jwt_secret_here"
+stream_api_key     = "your_stream_api_key_here"
+stream_api_secret  = "your_stream_api_secret_here"
 
+# Docker Image (update after first ECR push)
+docker_image = "869935099753.dkr.ecr.us-east-1.amazonaws.com/chat-app:latest"
 
+# HTTPS/SSL Configuration
+enable_https                = true
+domain_name                 = "hxrrvpsxtz.xyz"
+subject_alternative_names   = ["www.hxrrvpsxtz.xyz"]
+
+# WAF Configuration
+enable_waf              = true
+waf_rate_limit          = 2000  # requests per 5 minutes per IP
+waf_enable_geo_blocking = false
+waf_blocked_countries   = []    # e.g., ["CN", "RU"] to block China and Russia
+waf_log_retention_days  = 30
+
+# VPC Flow Logs
+enable_vpc_flow_logs     = true
+flow_logs_retention_days = 30
+flow_logs_traffic_type   = "ALL"  # ACCEPT, REJECT, or ALL
+
+# GuardDuty Threat Detection
+enable_guardduty                    = true
+guardduty_enable_s3_logs            = true
+guardduty_enable_malware_protection = true
+guardduty_finding_frequency         = "FIFTEEN_MINUTES"  # FIFTEEN_MINUTES, ONE_HOUR, or SIX_HOURS
+
+# Security Alerts
+enable_security_alerts  = true
+security_alert_email    = "your-email@example.com"  # Update with your email
+
+# AWS Config (Compliance Monitoring)
+enable_config = false  # Set to true for compliance requirements
