@@ -22,26 +22,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for SonarCloud
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.24'
 
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           STREAM_API_KEY: ${{ secrets.STREAM_API_KEY }}
           STREAM_API_SECRET: ${{ secrets.STREAM_API_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: go test -v ./...
+        run: |
+          go test -v -coverprofile=coverage.out -covermode=atomic ./...
+          go test -v -json ./... > test-report.json
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
+          args: --out-format=checkstyle:golangci-lint-report.xml
 
+
+
+  QAWithSonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
 
 
   deploy-aws:

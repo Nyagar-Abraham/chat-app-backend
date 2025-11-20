@@ -50,6 +50,11 @@ ECR_REPO=$(terraform output -raw ecr_repository_url)
 DB_ENDPOINT=$(terraform output -raw db_endpoint)
 ALB_DNS=$(terraform output -raw alb_dns_name)
 
+# Check if security features are enabled
+HTTPS_ENABLED=$(terraform output -raw enable_https 2>/dev/null || echo "false")
+WAF_ENABLED=$(terraform output -raw enable_waf 2>/dev/null || echo "false")
+GUARDDUTY_ENABLED=$(terraform output -raw enable_guardduty 2>/dev/null || echo "false")
+
 echo ""
 echo "✅ Infrastructure setup complete!"
 echo ""
@@ -57,11 +62,44 @@ echo "📊 Infrastructure Summary:"
 echo "  ECR Repository: $ECR_REPO"
 echo "  Database Endpoint: $DB_ENDPOINT"
 echo "  Load Balancer: $ALB_DNS"
+
+if [ "$HTTPS_ENABLED" = "true" ]; then
+    CERT_ARN=$(terraform output -raw certificate_arn 2>/dev/null)
+    echo "  SSL Certificate: $CERT_ARN"
+    echo "  Domain: hxrrvpsxtz.xyz"
+    echo ""
+    echo "⚠️  HTTPS ENABLED - DNS Validation Required:"
+    echo "  1. Add DNS validation records to GoDaddy"
+    echo "  2. View records: terraform output certificate_validation_records"
+    echo "  3. Wait for validation (5-30 minutes)"
+    echo "  4. Add A/CNAME records pointing to ALB"
+fi
+
+if [ "$WAF_ENABLED" = "true" ]; then
+    WAF_ID=$(terraform output -raw waf_web_acl_id 2>/dev/null)
+    echo "  WAF Web ACL: $WAF_ID"
+fi
+
+if [ "$GUARDDUTY_ENABLED" = "true" ]; then
+    GUARDDUTY_ID=$(terraform output -raw guardduty_detector_id 2>/dev/null)
+    echo "  GuardDuty Detector: $GUARDDUTY_ID"
+fi
+
 echo ""
 echo "🔄 Next Steps:"
-echo "  1. Update GitHub Secrets with AWS credentials"
-echo "  2. Update database URL secret with actual endpoint"
-echo "  3. Push code to trigger CI/CD deployment"
+echo "  1. Update database URL secret:"
+echo "     aws secretsmanager update-secret --secret-id chat-app/prod/database-url --secret-string 'postgresql://chatadmin:PASSWORD@${DB_ENDPOINT}/chat_db?sslmode=require'"
+if [ "$HTTPS_ENABLED" = "true" ]; then
+    echo "  2. Add DNS validation records to GoDaddy (see SECURITY_DEPLOYMENT_GUIDE.md)"
+    echo "  3. Confirm security alert email subscription"
+    echo "  4. Update GitHub Secrets with AWS credentials"
+    echo "  5. Push code to trigger CI/CD deployment"
+else
+    echo "  2. Update GitHub Secrets with AWS credentials"
+    echo "  3. Push code to trigger CI/CD deployment"
+fi
 echo ""
-echo "📝 Manual secret update command:"
-echo "  aws secretsmanager update-secret --secret-id chat-app/prod/database-url --secret-string 'postgresql://chatadmin:PASSWORD@${DB_ENDPOINT}/chat_db?sslmode=require'"
+echo "📚 Documentation:"
+echo "  - Security setup: terraform/SECURITY_DEPLOYMENT_GUIDE.md"
+echo "  - Security commands: terraform/SECURITY_COMMANDS.md"
+echo "  - IAM user setup: terraform/IAM_USER_SETUP.md"
