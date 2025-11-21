@@ -44,6 +44,11 @@ jobs:
           go test -v -coverprofile=coverage.out -covermode=atomic ./...
           go test -v -json ./... > test-report.json
           
+      - name: Verify coverage file
+        run: |
+          ls -la coverage.out
+          head -5 coverage.out
+          
       - name: Upload coverage artifact
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4
         with:
