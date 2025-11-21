@@ -48,7 +48,7 @@ jobs:
         uses: golangci/golangci-lint-action@7774f98a88e7cf61e429af992e73272d64787bac
         with:
           version: latest
-          args: --out-format=checkstyle:golangci-lint-report.xml
+#          args: --out-format=checkstyle:golangci-lint-report.xml
 
 
 
