@@ -43,6 +43,14 @@ jobs:
         run: |
           go test -v -coverprofile=coverage.out -covermode=atomic ./...
           go test -v -json ./... > test-report.json
+          
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.out
+            test-report.json
 
       - name: Run linter
         uses: golangci/golangci-lint-action@7774f98a88e7cf61e429af992e73272d64787bac
@@ -60,8 +68,14 @@ jobs:
       - uses: actions/checkout@163217dfcd28294438ea1c1c149cfaf66eec283e
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4
+        with:
+          name: coverage-report
+
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@689fb39b34b9aa95ebc5f8f119343ddd51542402
+        uses: SonarSource/sonarqube-scan-action@5837ebfccaf5b347ae1783644ecff31e2bafa086
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
