@@ -5,7 +5,14 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY cmd/ cmd/
+COPY db/ db/
+COPY handlers/ handlers/
+COPY middleware/ middleware/
+COPY models/ models/
+COPY services/ services/
+COPY utils/ utils/
+COPY testutil/ testutil/
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/main.go
 

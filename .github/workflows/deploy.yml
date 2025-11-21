@@ -1,5 +1,8 @@
 name: Deploy Backend to Production
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -22,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@163217dfcd28294438ea1c1c149cfaf66eec283e
         with:
           fetch-depth: 0  # Full history for SonarCloud
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@4de67c04ab4550d5b619aef0b37cd4ec732d7b37
         with:
           go-version: '1.24'
 
@@ -42,7 +45,7 @@ jobs:
           go test -v -json ./... > test-report.json
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@7774f98a88e7cf61e429af992e73272d64787bac
         with:
           version: latest
           args: --out-format=checkstyle:golangci-lint-report.xml
@@ -54,17 +57,17 @@ jobs:
     name: QAWithSonarqube
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@163217dfcd28294438ea1c1c149cfaf66eec283e
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@689fb39b34b9aa95ebc5f8f119343ddd51542402
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
         with:
           files: ./coverage.out
           flags: unittests
@@ -77,10 +80,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@163217dfcd28294438ea1c1c149cfaf66eec283e
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@f2e9d495b03c8294c97f731a3419cc72a206d05a
         with:
           aws-access-key-id: ${{ secrets.ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
