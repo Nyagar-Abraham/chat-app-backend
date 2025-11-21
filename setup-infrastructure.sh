@@ -63,7 +63,7 @@ echo "  ECR Repository: $ECR_REPO"
 echo "  Database Endpoint: $DB_ENDPOINT"
 echo "  Load Balancer: $ALB_DNS"
 
-if [ "$HTTPS_ENABLED" = "true" ]; then
+if [[ "$HTTPS_ENABLED" = "true" ]]; then
     CERT_ARN=$(terraform output -raw certificate_arn 2>/dev/null)
     echo "  SSL Certificate: $CERT_ARN"
     echo "  Domain: hxrrvpsxtz.xyz"
@@ -75,12 +75,12 @@ if [ "$HTTPS_ENABLED" = "true" ]; then
     echo "  4. Add A/CNAME records pointing to ALB"
 fi
 
-if [ "$WAF_ENABLED" = "true" ]; then
+if [[ "$WAF_ENABLED" = "true" ]]; then
     WAF_ID=$(terraform output -raw waf_web_acl_id 2>/dev/null)
     echo "  WAF Web ACL: $WAF_ID"
 fi
 
-if [ "$GUARDDUTY_ENABLED" = "true" ]; then
+if [[ "$GUARDDUTY_ENABLED" = "true" ]]; then
     GUARDDUTY_ID=$(terraform output -raw guardduty_detector_id 2>/dev/null)
     echo "  GuardDuty Detector: $GUARDDUTY_ID"
 fi

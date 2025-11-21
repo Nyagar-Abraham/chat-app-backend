@@ -8,14 +8,16 @@ import (
 	"github.com/Nyagar-Abraham/chat-app/models"
 )
 
+const QueryByIDAndTenantIdLiteral = "id = ?::uuid AND tenant_id = ?"
+
 func AddUserToChannel(channelID, userID, tenantID string) error {
 	var channel models.Channel
-	if err := db.DB.Where("id = ?::uuid AND tenant_id = ?", channelID, tenantID).First(&channel).Error; err != nil {
+	if err := db.DB.Where(QueryByIDAndTenantIdLiteral, channelID, tenantID).First(&channel).Error; err != nil {
 		return errors.New("channel not found or access denied")
 	}
 
 	var user models.User
-	if err := db.DB.Where("id = ?::uuid AND tenant_id = ?", userID, tenantID).First(&user).Error; err != nil {
+	if err := db.DB.Where(QueryByIDAndTenantIdLiteral, userID, tenantID).First(&user).Error; err != nil {
 		return errors.New("user not found or access denied")
 	}
 
@@ -47,7 +49,7 @@ func AddUserToChannel(channelID, userID, tenantID string) error {
 
 func RemoveUserFromChannel(channelID, userID, tenantID string) error {
 	var channel models.Channel
-	if err := db.DB.Where("id = ?::uuid AND tenant_id = ?", channelID, tenantID).First(&channel).Error; err != nil {
+	if err := db.DB.Where(QueryByIDAndTenantIdLiteral, channelID, tenantID).First(&channel).Error; err != nil {
 		return errors.New("channel not found or access denied")
 	}
 

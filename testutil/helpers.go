@@ -8,6 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	TenantOne  = "tenant-1"
+	UserOne    = "user-1"
+	ChannelOne = "channel-1"
+)
+
 // SetupTestRouter creates a test Gin router
 func SetupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
@@ -26,23 +32,23 @@ func SetupMockDB(t *testing.T) sqlmock.Sqlmock {
 // MockUserRows returns mock user data rows
 func MockUserRows() *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "email", "name", "password", "role", "tenant_id"}).
-		AddRow("user-1", "user1@example.com", "User One", "hashedpass", "MEMBER", "tenant-1")
+		AddRow(UserOne, "user1@example.com", "User One", "hashedpass", "MEMBER", TenantOne)
 }
 
 // MockChannelRows returns mock channel data rows
 func MockChannelRows() *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "stream_id", "name", "description", "tenant_id", "created_by"}).
-		AddRow("channel-1", "stream-123", "General", "General channel", "tenant-1", "user-1")
+		AddRow(ChannelOne, "stream-123", "General", "General channel", TenantOne, UserOne)
 }
 
 // MockChannelMemberRows returns mock channel member data rows
 func MockChannelMemberRows() *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "channel_id", "user_id", "tenant_id"}).
-		AddRow("member-1", "channel-1", "user-1", "tenant-1")
+		AddRow("member-1", ChannelOne, UserOne, TenantOne)
 }
 
 // MockTenantRows returns mock tenant data rows
 func MockTenantRows() *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "name"}).
-		AddRow("tenant-1", "Test Org")
+		AddRow(TenantOne, "Test Org")
 }

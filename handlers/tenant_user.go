@@ -14,6 +14,9 @@ type TenantResponse struct {
 	Name string `json:"name"`
 }
 
+const InvalidRequestMessage = "Invalid request"
+const CheckByIDQueryLiteral = "id = ?"
+
 // --- TENANT HANDLERS ---
 
 // CreateTenant creates a new tenant (Admin only)
@@ -31,7 +34,7 @@ type TenantResponse struct {
 func CreateTenant(c *gin.Context) {
 	var req models.Tenant
 	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": InvalidRequestMessage})
 		return
 	}
 	if err := db.DB.Create(&req).Error; err != nil {
@@ -54,7 +57,7 @@ func GetTenant(context *gin.Context) {
 	var tenant models.Tenant
 	tenantId := context.Param("id")
 
-	if err := db.DB.Where("id = ?", tenantId).First(&tenant).Error; err != nil {
+	if err := db.DB.Where(CheckByIDQueryLiteral, tenantId).First(&tenant).Error; err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Tenant not found"})
 	}
 	context.JSON(http.StatusOK, TenantResponse{
@@ -97,7 +100,7 @@ func ListTenants(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var req models.User
 	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": InvalidRequestMessage})
 		return
 	}
 
@@ -156,12 +159,12 @@ func UpdateUser(c *gin.Context) {
 	userID := c.Param("id")
 	var req models.User
 	var user models.User
-	if err := db.DB.First(&user, "id = ?", userID).Error; err != nil {
+	if err := db.DB.First(&user, CheckByIDQueryLiteral, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": InvalidRequestMessage})
 		return
 	}
 	if req.Name != "" {
@@ -191,7 +194,7 @@ func UpdateUser(c *gin.Context) {
 // @Router /users/{id} [delete]
 func DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
-	if err := db.DB.Delete(&models.User{}, "id = ?", userID).Error; err != nil {
+	if err := db.DB.Delete(&models.User{}, CheckByIDQueryLiteral, userID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not delete user"})
 		return
 	}

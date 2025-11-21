@@ -101,8 +101,6 @@ func ListChannels(c *gin.Context) {
 		return
 	}
 
-	log.Println("CHANNELS RETURNED", channels)
-
 	c.JSON(http.StatusOK, channels)
 }
 
@@ -123,8 +121,6 @@ func AddUserToChannel(c *gin.Context) {
 	log.Println("AddUserToChannel RUN")
 	channelID := c.Param("id")
 	tenantID, _ := c.Get("tenant_id")
-	log.Println("AddUserToChannel channelID", channelID)
-	log.Println("AddUserToChannel tenantID", tenantID)
 
 	var req struct {
 		UserID string `json:"user_id" binding:"required"`
@@ -135,8 +131,6 @@ func AddUserToChannel(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
-
-	log.Println("AddUserToChannel userId", req.UserID)
 
 	if err := services.AddUserToChannel(channelID, req.UserID, tenantID.(string)); err != nil {
 		log.Println("AddUserToChannel BINDERR=", err.Error())
@@ -233,7 +227,5 @@ func GetChannelMembers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch members"})
 		return
 	}
-
-	log.Println("GetChannelMember -> ", users)
 	c.JSON(http.StatusOK, users)
 }
