@@ -23,3 +23,4 @@ MIGRATE_DB=false
 EXPOSE 8085
 
 CMD ["./main"]
+
