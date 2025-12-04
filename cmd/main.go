@@ -78,7 +78,7 @@ func main() {
 	if port == "" {
 		port = "8085"
 	}
-	log.Printf("Listening on port::: %s", port)
+	log.Printf("Listening on port: %s", port)
 
 	if err := router.Run(":8085"); err != nil {
 		log.Fatal("Failed to start server:", err)
